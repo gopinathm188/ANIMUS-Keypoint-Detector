@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>ANIMUS // Social Distancing Monitor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Share+Tech+Mono&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#c8a84b;--gold2:#e8c96a;--red:#cc3300;--green:#4a8a30;
+  --dark:#0a0800;--panel:#0f0d05;--border:#3a2e10;--text:#b8a060;
+  --dim:#5a4a20;--white:#e8d890;--amber:#d4820a;
+  --font:'Share Tech Mono',monospace;--title:'Cinzel',serif;
+}
+body{background:var(--dark);color:var(--text);font-family:var(--font);
+  height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+.top{background:#080600;border-bottom:1px solid var(--border);padding:7px 16px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.logo{font-family:var(--title);color:var(--gold);font-size:13px;letter-spacing:3px}
+.logo-sub{font-size:8px;color:var(--dim);letter-spacing:2px;margin-top:1px}
+.top-right{display:flex;align-items:center;gap:14px}
+.clock{color:var(--gold);font-size:13px;letter-spacing:2px}
+.rec{display:flex;align-items:center;gap:5px;color:var(--red);font-size:9px}
+.rec-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+.conn{font-size:9px;letter-spacing:1px}
+.conn-ok{color:var(--green)}.conn-err{color:var(--red)}.conn-wait{color:var(--amber)}
+.sync-wrap{display:flex;align-items:center;gap:5px;font-size:9px}
+.sync-lbl{color:var(--dim);letter-spacing:1px}
+.sync-dots{display:flex;gap:3px}
+.sd{width:7px;height:7px;border-radius:50%;background:var(--gold);opacity:.15;transition:opacity .3s}
+.sd.on{opacity:1}
+
+.body{display:grid;grid-template-columns:230px 1fr 260px;flex:1;overflow:hidden}
+.left{background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.center{display:flex;flex-direction:column;overflow:hidden;background:#050400}
+.right{background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+
+.sec{border-bottom:1px solid var(--border);padding:9px 12px;flex-shrink:0}
+.sec-title{font-family:var(--title);font-size:8px;color:var(--gold);letter-spacing:2px;margin-bottom:7px}
+
+.rule-card{border:1px solid var(--border);border-radius:2px;padding:6px 9px;margin-bottom:5px}
+.rc-lbl{font-size:7px;letter-spacing:1px;margin-bottom:2px;color:var(--dim)}
+.rc-val{font-size:10px}
+.rc-ok{border-color:#1a3010;background:rgba(74,138,48,.04)}
+.rc-ok .rc-val{color:var(--green)}
+.rc-alert{border-color:var(--red);background:rgba(204,51,0,.08);animation:pb 1s infinite}
+.rc-alert .rc-lbl,.rc-alert .rc-val{color:var(--red)}
+.rc-warn{border-color:var(--amber);background:rgba(212,130,10,.06)}
+.rc-warn .rc-val{color:var(--amber)}
+@keyframes pb{0%,100%{border-color:var(--red)}50%{border-color:transparent}}
+
+.gauge-wrap{padding:9px 12px}
+.gc{width:84px;height:84px;border-radius:50%;border:2px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin:8px auto;transition:border-color .4s}
+.gc-val{font-size:20px;font-weight:bold;line-height:1}
+.gc-lbl{font-size:7px;letter-spacing:2px;margin-top:2px}
+.g-bar-bg{background:#0a0800;border:1px solid var(--border);height:6px;overflow:hidden;margin-top:6px}
+.g-bar{height:100%;transition:width .4s,background .4s}
+.g-cond{text-align:center;font-size:8px;margin-top:4px;color:var(--dim)}
+
+.feed-hdr{padding:5px 12px;background:#060400;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;font-size:9px;color:var(--dim);flex-shrink:0}
+.feed-wrap{flex:1;position:relative;overflow:hidden;background:#030200;
+  display:flex;align-items:center;justify-content:center}
+.feed-wrap img{width:100%;height:100%;object-fit:contain;display:none}
+.feed-ph{text-align:center;opacity:.2}
+.feed-ph p{font-size:9px;letter-spacing:2px;margin-top:8px;font-family:var(--title)}
+.ev-corner{position:absolute;width:18px;height:18px;border-color:var(--gold);border-style:solid;opacity:.4}
+.ctl{top:8px;left:8px;border-width:2px 0 0 2px}
+.ctr{top:8px;right:8px;border-width:2px 2px 0 0}
+.cbl{bottom:8px;left:8px;border-width:0 0 2px 2px}
+.cbr{bottom:8px;right:8px;border-width:0 2px 2px 0}
+.scanline{position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(200,168,75,.01) 3px,rgba(200,168,75,.01) 4px)}
+.alert-banner{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);
+  padding:10px;text-align:center;font-size:12px;letter-spacing:2px;
+  border-top:1px solid var(--red);border-bottom:1px solid var(--red);
+  background:rgba(204,51,0,.15);color:var(--red);display:none;animation:af .6s infinite}
+@keyframes af{0%,100%{opacity:1}50%{opacity:.4}}
+
+.log-wrap{border-top:1px solid var(--border);display:flex;flex-direction:column;max-height:175px;flex-shrink:0}
+.log-hdr{padding:4px 12px;border-bottom:1px solid var(--border);
+  font-family:var(--title);font-size:8px;color:var(--gold);letter-spacing:2px}
+.log-body{overflow-y:auto;padding:5px 12px;font-size:9px;line-height:1.9}
+.ll{color:var(--dim);border-bottom:1px solid #150f00;padding:1px 0}
+.ll.viol{color:var(--red)}.ll-ts{color:var(--gold2);margin-right:5px}
+
+.last-wrap{padding:7px 12px;border-top:1px solid var(--border);flex-shrink:0}
+.last-row{display:flex;gap:6px;margin-bottom:2px}
+.last-k{color:var(--dim);font-size:8px;width:50px;flex-shrink:0}
+.last-v{color:var(--text);font-size:8px}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.stat{background:#0a0800;border:1px solid var(--border);border-radius:1px;padding:6px 8px}
+.stat-l{font-size:7px;color:var(--dim);letter-spacing:1px;margin-bottom:2px}
+.stat-v{font-size:17px;font-weight:bold}
+
+.pair-list{overflow-y:auto;flex:1}
+.pair-row{display:flex;justify-content:space-between;align-items:center;
+  padding:3px 0;border-bottom:1px solid #150f00;font-size:9px}
+.pd{padding:1px 5px;border-radius:1px;font-size:8px;border:1px solid}
+.pd-ok{color:var(--green);border-color:var(--green);background:rgba(74,138,48,.06)}
+.pd-viol{color:var(--red);border-color:var(--red);background:rgba(204,51,0,.08)}
+
+.bot{background:#060400;border-top:1px solid var(--border);padding:4px 14px;
+  font-size:8px;color:var(--dim);display:flex;justify-content:space-between;flex-shrink:0}
+.scroll-sm::-webkit-scrollbar{width:2px}
+.scroll-sm::-webkit-scrollbar-thumb{background:var(--border)}
+</style>
+</head>
+<body>
+
+<!-- TOP -->
+<div class="top">
+  <div>
+    <div class="logo">ANIMUS // SOCIAL DISTANCING MONITOR</div>
+    <div class="logo-sub">ABSTERGO SURVEILLANCE — EAGLE VISION — POSE ESTIMATION</div>
+  </div>
+  <div class="top-right">
+    <div class="sync-wrap">
+      <span class="sync-lbl">SYNC</span>
+      <div class="sync-dots" id="syncDots">
+        <div class="sd on"></div><div class="sd on"></div>
+        <div class="sd"></div><div class="sd"></div><div class="sd"></div>
+      </div>
+    </div>
+    <div class="rec"><div class="rec-dot"></div>LIVE</div>
+    <div class="clock" id="clock">--:--:--</div>
+    <div class="conn conn-wait" id="conn">● CONNECTING...</div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="sec">
+      <div class="sec-title">Distancing Rules</div>
+      <div class="rule-card rc-ok" id="rcPersons">
+        <div class="rc-lbl">PERSONS IN FRAME</div>
+        <div class="rc-val" id="rvPersons">0 — Awaiting</div>
+      </div>
+      <div class="rule-card rc-ok" id="rcStatus">
+        <div class="rc-lbl">DISTANCING STATUS</div>
+        <div class="rc-val" id="rvStatus">All Clear</div>
+      </div>
+      <div class="rule-card rc-warn" id="rcThresh">
+        <div class="rc-lbl">THRESHOLD</div>
+        <div class="rc-val" id="rvThresh">150px — Active</div>
+      </div>
+    </div>
+
+    <div class="sec" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+      <div class="sec-title">Distance Pairs</div>
+      <div class="pair-list scroll-sm" id="pairList">
+        <div style="color:var(--dim);font-size:9px">Need 2+ targets</div>
+      </div>
+    </div>
+
+    <!-- Gauge -->
+    <div class="gauge-wrap">
+      <div class="sec-title" style="margin-bottom:0">Violation Rate</div>
+      <div class="gc" id="gaugeCircle">
+        <div class="gc-val" id="gVal" style="color:var(--green)">0%</div>
+        <div class="gc-lbl" id="gLbl" style="color:var(--green)">CLEAR</div>
+      </div>
+      <div class="g-bar-bg"><div class="g-bar" id="gBar" style="width:0%;background:var(--green)"></div></div>
+      <div class="g-cond" id="gCond">CONDITION CLEAR</div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center">
+    <div class="feed-hdr">
+      <span>ANIMUS FEED — EAGLE VISION — POSE TRACKING</span>
+      <span id="fpsLbl">FPS: --  |  FRAME: -----</span>
+    </div>
+    <div class="feed-wrap" id="feedWrap">
+      <div class="ev-corner ctl"></div><div class="ev-corner ctr"></div>
+      <div class="ev-corner cbl"></div><div class="ev-corner cbr"></div>
+      <div class="scanline"></div>
+      <img id="videoFeed" src="" alt=""/>
+      <div class="feed-ph" id="feedPh">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <rect x="3" y="3" width="50" height="50" rx="2" stroke="#3a2e10" stroke-width="1.2"/>
+          <circle cx="18" cy="20" r="4" stroke="#3a2e10" stroke-width="1.2"/>
+          <line x1="18" y1="24" x2="18" y2="36" stroke="#3a2e10" stroke-width="1.2"/>
+          <circle cx="38" cy="20" r="4" stroke="#3a2e10" stroke-width="1.2"/>
+          <line x1="38" y1="24" x2="38" y2="36" stroke="#3a2e10" stroke-width="1.2"/>
+          <line x1="18" y1="30" x2="38" y2="30" stroke="#cc3300" stroke-width="1" stroke-dasharray="3,2"/>
+          <line x1="3" y1="3" x2="11" y2="3" stroke="#c8a84b" stroke-width="1.8"/>
+          <line x1="3" y1="3" x2="3" y2="11" stroke="#c8a84b" stroke-width="1.8"/>
+          <line x1="53" y1="3" x2="45" y2="3" stroke="#c8a84b" stroke-width="1.8"/>
+          <line x1="53" y1="3" x2="53" y2="11" stroke="#c8a84b" stroke-width="1.8"/>
+          <line x1="3" y1="53" x2="11" y2="53" stroke="#c8a84b" stroke-width="1.8"/>
+          <line x1="3" y1="53" x2="3" y2="45" stroke="#c8a84b" stroke-width="1.8"/>
+          <line x1="53" y1="53" x2="45" y2="53" stroke="#c8a84b" stroke-width="1.8"/>
+          <line x1="53" y1="53" x2="53" y2="45" stroke="#c8a84b" stroke-width="1.8"/>
+        </svg>
+        <p>AWAITING ANIMUS FEED</p>
+        <p style="font-size:8px;margin-top:4px;color:#3a2e10">Start social_distancing.py first</p>
+      </div>
+      <div class="alert-banner" id="alertBanner">!! ANIMUS ALERT: SOCIAL DISTANCING VIOLATION !!</div>
+    </div>
+
+    <!-- LOG -->
+    <div class="log-wrap">
+      <div class="log-hdr">Event Log</div>
+      <div class="log-body scroll-sm" id="logBody"></div>
+    </div>
+
+    <!-- LAST -->
+    <div class="last-wrap">
+      <div class="sec-title" style="margin-bottom:5px">Last Violation</div>
+      <div class="last-row"><span class="last-k">DETAIL:</span><span class="last-v" id="lDetail">—</span></div>
+      <div class="last-row"><span class="last-k">TIME:</span><span class="last-v" id="lTime">—</span></div>
+      <div class="last-row"><span class="last-k">SINCE:</span><span class="last-v" id="lSince">—</span></div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="sec">
+      <div class="sec-title">Detection Stats</div>
+      <div class="stat-grid">
+        <div class="stat"><div class="stat-l">PERSONS</div><div class="stat-v" id="sPer" style="color:var(--green)">0</div></div>
+        <div class="stat"><div class="stat-l">VIOLATIONS</div><div class="stat-v" id="sVio" style="color:var(--red)">0</div></div>
+        <div class="stat"><div class="stat-l">PAIRS</div><div class="stat-v" id="sPairs" style="color:var(--gold)">0</div></div>
+        <div class="stat"><div class="stat-l">FRAMES</div><div class="stat-v" id="sFr" style="color:var(--text)">0</div></div>
+      </div>
+    </div>
+
+    <div class="sec" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+      <div class="sec-title">Active Violations</div>
+      <div class="pair-list scroll-sm" id="violList">
+        <div style="color:var(--dim);font-size:9px">No violations</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-title">System Info</div>
+      <div style="font-size:9px;line-height:2.1;color:var(--dim)">
+        <div>MODEL  : <span style="color:var(--text)">YOLOv8n-Pose</span></div>
+        <div>DEVICE : <span style="color:var(--text)">Jetson Orin</span></div>
+        <div>METHOD : <span style="color:var(--text)">Hip midpoint</span></div>
+        <div>FORMULA: <span style="color:var(--text)">Euclidean dist</span></div>
+        <div>THRESH : <span style="color:var(--text)" id="sThresh">150px</span></div>
+        <div>SAFE   : <span style="color:var(--green)">dist > thresh ✓</span></div>
+        <div>UNSAFE : <span style="color:var(--red)">dist ≤ thresh ✗</span></div>
+        <div>UPTIME : <span style="color:var(--text)" id="uptime">--:--:--</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM -->
+<div class="bot">
+  <span>MODEL: YOLOV8N-POSE | HIP MIDPOINT | EUCLIDEAN DISTANCE | GPU: ORIN</span>
+  <span id="botStatus">STATUS: SYNCHRONIZING</span>
+  <span>LAB #6 — MOHANASUNDARAM</span>
+</div>
+
+<script>
+const WS_URL='ws://localhost:8765';
+const STREAM_URL='http://localhost:8080/stream';
+let ws,retryTimer,alertTimer=null,lastViolTs=null,logLines=[],syncLevel=2;
+
+setInterval(()=>{
+  document.getElementById('clock').textContent=new Date().toTimeString().slice(0,8);
+  if(lastViolTs){
+    const s=Math.round((Date.now()-lastViolTs)/1000);
+    document.getElementById('lSince').textContent=s+'s ago';
+  }
+},1000);
+
+function connect(){
+  setConn('wait','● CONNECTING...');
+  ws=new WebSocket(WS_URL);
+  ws.onopen=()=>{
+    setConn('ok','● SYNCHRONIZED');
+    addLog('Animus connection established',false);
+    syncLevel=5; updateSyncDots();
+    const img=document.getElementById('videoFeed');
+    img.src=STREAM_URL+'?t='+Date.now();
+    img.style.display='block';
+    document.getElementById('feedPh').style.display='none';
+  };
+  ws.onclose=()=>{
+    setConn('err','● DESYNCHRONIZED');
+    addLog('Connection lost — resynchronizing...',false);
+    syncLevel=1; updateSyncDots();
+    document.getElementById('videoFeed').style.display='none';
+    document.getElementById('feedPh').style.display='flex';
+    retryTimer=setTimeout(connect,3000);
+  };
+  ws.onerror=()=>addLog('WS error — is social_distancing.py running?',false);
+  ws.onmessage=e=>{ try{ handle(JSON.parse(e.data)); }catch(x){ console.error(x); } };
+}
+
+function setConn(cls,txt){
+  const el=document.getElementById('conn');
+  el.className='conn conn-'+cls; el.textContent=txt;
+}
+
+function updateSyncDots(){
+  const dots=document.getElementById('syncDots').children;
+  for(let i=0;i<5;i++) dots[i].className='sd'+(i<syncLevel?' on':'');
+}
+
+function handle(d){
+  updateGauge(d);
+  updateRules(d);
+  updateStats(d);
+  updatePairs(d);
+  updateViolList(d.violations||[]);
+  if(d.violations&&d.violations.length){
+    d.violations.forEach(v=>{
+      addLog(`P${v.a+1} & P${v.b+1} — dist:${v.dist.toFixed(0)}px (limit:${d.threshold}px)`,true);
+    });
+    triggerAlert();
+    updateLast(d);
+  }
+  document.getElementById('fpsLbl').textContent=
+    `FPS: ${d.fps||'--'}  |  FRAME: ${String(d.frame||0).padStart(5,'0')}`;
+  document.getElementById('sThresh').textContent=(d.threshold||150)+'px';
+  document.getElementById('rvThresh').textContent=(d.threshold||150)+'px — Active';
+  document.getElementById('botStatus').textContent=
+    d.violations&&d.violations.length?'STATUS: !! VIOLATION DETECTED':'STATUS: SYNCHRONIZED';
+  syncLevel=d.violations&&d.violations.length?3:5; updateSyncDots();
+  if(d.stats){
+    const up=d.stats.uptime||0;
+    document.getElementById('uptime').textContent=
+      `${p2(Math.floor(up/3600))}:${p2(Math.floor((up%3600)/60))}:${p2(Math.floor(up%60))}`;
+  }
+}
+
+function updateGauge(d){
+  const viols=d.violations||[];
+  const pairs=d.pairs||[];
+  const pct=pairs.length?Math.min(Math.round(viols.length/pairs.length*100),100):0;
+  let color,label,cond;
+  if(pct===0){color='var(--green)';label='CLEAR';cond='CONDITION CLEAR';}
+  else if(pct<50){color='var(--amber)';label='CAUTION';cond='CONDITION AMBER';}
+  else{color='var(--red)';label='CRITICAL';cond='CONDITION CRITICAL';}
+  document.getElementById('gBar').style.cssText=`width:${pct}%;background:${color}`;
+  document.getElementById('gaugeCircle').style.borderColor=color;
+  const gv=document.getElementById('gVal'); gv.style.color=color; gv.textContent=pct+'%';
+  const gl=document.getElementById('gLbl'); gl.style.color=color; gl.textContent=label;
+  const gc=document.getElementById('gCond'); gc.style.color=color; gc.textContent=cond;
+}
+
+function updateRules(d){
+  const viols=d.violations||[];
+  const persons=d.persons||0;
+  setCard('rcPersons','rvPersons','rc-ok',
+    `${persons} target(s) — ${persons>1?'Monitoring':'Waiting'}`);
+  setCard('rcStatus','rvStatus',viols.length?'rc-alert':'rc-ok',
+    viols.length?`!! ${viols.length} VIOLATION(S)`:'All Clear');
+}
+
+function setCard(cid,vid,cls,txt){
+  document.getElementById(cid).className='rule-card '+cls;
+  document.getElementById(vid).textContent=txt;
+}
+
+function updateStats(d){
+  document.getElementById('sPer').textContent=d.persons||0;
+  if(d.stats) document.getElementById('sVio').textContent=d.stats.total_violations||0;
+  document.getElementById('sPairs').textContent=(d.pairs||[]).length;
+  document.getElementById('sFr').textContent=d.frame||0;
+}
+
+function updatePairs(d){
+  const pairs=d.pairs||[];
+  const list=document.getElementById('pairList');
+  if(!pairs.length){
+    list.innerHTML='<div style="color:var(--dim);font-size:9px">Need 2+ targets</div>';
+    return;
+  }
+  list.innerHTML=pairs.map(p=>
+    `<div class="pair-row">
+      <span style="color:${p.violation?'var(--red)':'var(--text)'}">TGT-${p.a+1} ↔ TGT-${p.b+1}</span>
+      <span class="pd ${p.violation?'pd-viol':'pd-ok'}">${p.dist.toFixed(0)}px</span>
+    </div>`
+  ).join('');
+}
+
+function updateViolList(viols){
+  const list=document.getElementById('violList');
+  if(!viols.length){
+    list.innerHTML='<div style="color:var(--dim);font-size:9px">No violations</div>';
+    return;
+  }
+  list.innerHTML=viols.map(v=>
+    `<div class="pair-row">
+      <span style="color:var(--red)">!! TGT-${v.a+1} & TGT-${v.b+1}</span>
+      <span class="pd pd-viol">${v.dist.toFixed(0)}px</span>
+    </div>`
+  ).join('');
+}
+
+function triggerAlert(){
+  const b=document.getElementById('alertBanner');
+  b.style.display='block';
+  if(alertTimer) clearTimeout(alertTimer);
+  alertTimer=setTimeout(()=>b.style.display='none',3500);
+}
+
+function updateLast(d){
+  const v=d.violations[0];
+  document.getElementById('lDetail').textContent=
+    `TGT-${v.a+1} & TGT-${v.b+1} — ${v.dist.toFixed(0)}px`;
+  document.getElementById('lTime').textContent=new Date().toTimeString().slice(0,8);
+  document.getElementById('lSince').textContent='0s ago';
+  lastViolTs=Date.now();
+}
+
+function addLog(msg,isViol){
+  const ts=new Date().toTimeString().slice(0,8);
+  logLines.unshift({ts,msg,isViol});
+  if(logLines.length>50) logLines.pop();
+  document.getElementById('logBody').innerHTML=logLines.map(l=>
+    `<div class="ll${l.isViol?' viol':''}">
+      <span class="ll-ts">[${l.ts}]</span>${l.msg}
+    </div>`
+  ).join('');
+}
+
+function p2(n){return String(n).padStart(2,'0')}
+addLog('Animus Social Distancing Monitor initializing...',false);
+connect();
+</script>
+</body>
+</html>

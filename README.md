@@ -12,12 +12,12 @@
 
 ### Anomaly Detected — Arms Raised — Red Skeleton
 <p align="center">
-  <img src="docs/keypoint_detector_2.png" alt="Arms Raised Anomaly" width="800"/>
+  <img src="docs/keypoint_detector_3.png" alt="Arms Raised Anomaly" width="800"/>
 </p>
 
 ### Browser UI — Animus Dashboard — Synchronized
 <p align="center">
-  <img src="docs/animus_ui.png" alt="Animus Browser UI" width="800"/>
+  <img src="docs/keypoint_detector_2.png" alt="Animus Browser UI" width="800"/>
 </p>
 
 ---
@@ -112,9 +112,9 @@ firefox animus_ui.html
 ```
 
 **Step 3 — Test poses:**
-- Stand normally → gold skeleton, no alert ✅
-- Raise both arms above head → red skeleton + CRITICAL ALERT 🔴
-- Two people close → red distance line + violation 🔴
+- Stand normally → gold skeleton, no alert
+- Raise both arms above head → red skeleton + CRITICAL ALERT
+- Two people close → red distance line + violation
 
 ---
 

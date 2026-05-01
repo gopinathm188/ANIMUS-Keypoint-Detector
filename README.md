@@ -7,17 +7,17 @@
 
 ### Normal Pose — Gold Skeleton — All Clear
 <p align="center">
-  <img src="docs/Keypoint_detector_1.png" alt="Normal Keypoint Detection" width="800"/>
+  <img src="docs/keypoint detector 1.png" alt="Normal Keypoint Detection" width="800"/>
 </p>
 
 ### Anomaly Detected — Arms Raised — Red Skeleton
 <p align="center">
-  <img src="docs/Keypoint_detector_3.png" alt="Arms Raised Anomaly" width="800"/>
+  <img src="docs/Kkeypoint detector 2.png" alt="Arms Raised Anomaly" width="800"/>
 </p>
 
 ### Browser UI — Animus Dashboard — Synchronized
 <p align="center">
-  <img src="docs/keypoint_detector_2.png" alt="Animus Browser UI" width="800"/>
+  <img src="docs/keypoint detector 3.png" alt="Animus Browser UI" width="800"/>
 </p>
 
 ---

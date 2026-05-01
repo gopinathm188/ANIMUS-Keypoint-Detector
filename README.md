@@ -12,7 +12,7 @@
 
 ### Anomaly Detected — Arms Raised — Red Skeleton
 <p align="center">
-  <img src="docs/Kkeypoint detector 2.png" alt="Arms Raised Anomaly" width="800"/>
+  <img src="docs/keypoint detector 2.png" alt="Arms Raised Anomaly" width="800"/>
 </p>
 
 ### Browser UI — Animus Dashboard — Synchronized
